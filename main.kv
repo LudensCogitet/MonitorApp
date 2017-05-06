@@ -1,0 +1,37 @@
+<SliderNode>:
+    orientation: 'vertical'
+    Slider:
+        id: slider
+    Label:
+        font_size: 10
+        text: self.parent.id
+
+<LabelNode>:
+    orientation: 'vertical'
+    Label:
+        id: name
+        text: self.parent.id
+        font_size: 10
+    Label:
+        id: value
+        font_size: 30
+
+<CommandPrompt>:
+    orientation: 'vertical'
+    TextInput:
+        focus: True
+        multiline: False
+        id: textinput
+        text: "Hello World"
+        height: 30
+        font_size: 14
+        size_hint_y: None
+        on_focus: self.parent.checkCom()
+
+<MainWidget>:
+    orientation: 'vertical'
+    BoxLayout:
+        id: workSpace
+        orientation: 'vertical'
+    BoxLayout:
+        id: commandSpace
