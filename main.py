@@ -19,6 +19,9 @@ class Parser:
             elif args[1].lower() == 'slider':
                 if len(args) > 2:
                     self.mainWidget.addWidget('Slider',args[2])
+        if command == 'remove':
+            if args[1].lower() == 'widget':
+                self.mainWidget.removeWidget(args[2])
 
 class SliderNode(BoxLayout):
     def changeVal(self, value):
@@ -58,6 +61,10 @@ class MainWidget(BoxLayout):
 
         self.ids.workSpace.add_widget(self.widgets[name])
         print(self.commandPrompt)
+
+    def removeWidget(self, name):
+        widget = self.widgets.pop(name,None)
+        self.remove_widget(widget)
 
 class MainApp(App):
     def __init__(self):
