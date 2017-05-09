@@ -1,91 +1,90 @@
+from kivy.config import Config
+Config.set('graphics', 'width', '1280')
+Config.set('graphics', 'height', '720')
+
 from kivy.app import App
+from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.label import Label
 from kivy.uix.slider import Slider
-from kivy.clock import Clock
-from source import RandSource
+from kivy.uix.label import Label
+from kivy.uix.behaviors import DragBehavior, ButtonBehavior
+from kivy.properties import ObjectProperty
+from kivy.core.window import Window
+
 import re
+from Parser import Parser
 
-class Parser:
-    def __init__(self,mainWidget):
-        self.mainWidget = mainWidget
+class SliderMonitor(Slider):
+    pass
 
-    def parseCom(self, args):
-        command = args[0].lower()
-        if command == 'add':
-            if args[1].lower() == 'label':
-                if len(args) > 2:
-                    self.mainWidget.addWidget('Label',args[2])
-            elif args[1].lower() == 'slider':
-                if len(args) > 2:
-                    self.mainWidget.addWidget('Slider',args[2])
-        if command == 'remove':
-            if args[1].lower() == 'widget':
-                self.mainWidget.removeWidget(args[2])
+class NumberMonitor(Label):
+    pass
 
-class SliderNode(BoxLayout):
-    def changeVal(self, value):
-        self.ids['slider'].value = value
+class ConsoleWidget(DragBehavior, BoxLayout):
+    def __init__(self):
+        super(ConsoleWidget,self).__init__()
+        self.active = False
 
-class LabelNode(BoxLayout):
-    def changeVal(self, value):
-        self.ids['value'].text = str(value)
+    def handleInput(self):
+        console = self.ids.readout.children[0]
+        commandline = self.ids.commandline
+        text = commandline.text
 
-class CommandPrompt(BoxLayout):
-    def __init__(self,parser):
-        super(CommandPrompt,self).__init__()
-        self.parser = parser
+        commands = text.split(' ')
+        parseReturn = app.parser.execute(commands[0],*commands[1:])
+        console.text = console.text + parseReturn
 
-    def checkCom(self):
-        textinput = self.ids['textinput']
-        if textinput.focus == False:
-            self.parser.parseCom(re.split(" ",textinput.text))
-            print(textinput.text)
-            textinput.text = ''
-            textinput.focus = True
+        self.ids.commandline.text = ""
+        self.ids.commandline.focus = True
 
 class MainWidget(BoxLayout):
     def __init__(self):
         super(MainWidget,self).__init__()
-        self.widgets = {}
-        self.commandPrompt = CommandPrompt(Parser(self))
-        self.ids.commandSpace.add_widget(self.commandPrompt)
+        self._keyboard = Window.request_keyboard(None,self)
+        self._keyboard.bind(on_key_down=self._on_keyboard_down)
+        self.console = ConsoleWidget()
+        self.monitorTypes = ['number','slider']
+        self.monitors = {}
 
-    def addWidget(self, wType, name):
-        if wType == 'Label':
-            self.widgets[name] = LabelNode(id=name)
-        elif wType == 'Slider':
-            self.widgets[name] = SliderNode(id=name)
+    def addMonitor(self,type,name,*args):
+        if type == 'number':
+            self.monitors[name] = NumberMonitor()
+        elif type == 'slider':
+            self.monitors[name] = SliderMonitor()
 
-        app.sources[len(self.widgets)%2][1].append(name)
+        self.ids.monitorSpace.add_widget(self.monitors[name])
 
-        self.ids.workSpace.add_widget(self.widgets[name])
-        print(self.commandPrompt)
 
-    def removeWidget(self, name):
-        widget = self.widgets.pop(name,None)
-        self.remove_widget(widget)
+    def _on_keyboard_down(self,keyboard,keycode,text,modifiers):
+        if self.console.active == True:
+            if keycode[1] == 'tab' :
+                self._close_console()
+            elif keycode[1] == 'enter':
+                self.console.handleInput()
+        elif self.console.active == False:
+            if keycode[1] == 'tab':
+                self._open_console()
+
+    def _open_console(self):
+        self.console.active = True
+        self.add_widget(self.console)
+        self.console.ids.commandline.focus = True
+
+    def _close_console(self):
+        self.console.active = False
+        self.console.ids.commandline.text = ""
+        self.remove_widget(self.console)
 
 class MainApp(App):
     def __init__(self):
         super(MainApp,self).__init__()
-        self.sources = [[RandSource('rand1'),[]],[RandSource('rand2',5),[]]]
         self.mainWidget = None
+        self.parser = None
 
     def build(self):
         self.mainWidget = MainWidget()
-
+        self.parser = Parser(self.mainWidget)
         return self.mainWidget
-
-    def checkSources(self,dt):
-        for source in self.sources:
-            retVal = source[0].checkVal()
-            for bound in source[1]:
-                self.mainWidget.widgets[bound].changeVal(retVal[2])
-
-
-    def on_start(self):
-        Clock.schedule_interval(self.checkSources,0.1)
 
 if __name__ == '__main__':
     app = MainApp()

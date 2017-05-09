@@ -1,37 +1,71 @@
-<SliderNode>:
+<MainWidget>:
+    canvas.before:
+        Color:
+            rgba: 0.8,0.8,0.8,1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    BoxLayout:
+        id: monitorSpace
+
+
+<SliderMonitor>:
     orientation: 'vertical'
     Slider:
         id: slider
     Label:
         font_size: 10
-        text: self.parent.id
 
-<LabelNode>:
+<NumberMonitor>:
     orientation: 'vertical'
     Label:
         id: name
-        text: self.parent.id
         font_size: 10
     Label:
         id: value
+        text: "LOLOLOLOL!"
         font_size: 30
 
-<CommandPrompt>:
+<ConsoleWidget>:
+    on_pos: print(str(self.pos))
     orientation: 'vertical'
-    TextInput:
-        focus: True
-        multiline: False
-        id: textinput
-        text: "Hello World"
-        height: 30
-        font_size: 14
-        size_hint_y: None
-        on_focus: self.parent.checkCom()
+    drag_rectangle: self.x, self.y, self.width, self.height
+    drag_timeout: 10000000
+    drag_distance: 0
 
-<MainWidget>:
-    orientation: 'vertical'
-    BoxLayout:
-        id: workSpace
-        orientation: 'vertical'
-    BoxLayout:
-        id: commandSpace
+    size_hint: (None,None)
+    width: 400
+    height: 300
+
+    ScrollView:
+        id: readout
+
+        canvas.before:
+            Color:
+                rgba: 0,0,0,1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        do_scroll_x: False
+        Label:
+            color: 0,1,0,1
+
+            size: self.texture_size
+            text_size: self.parent.width, None
+
+            valign: 'top'
+            halign: 'left'
+
+            size_hint_y: None
+
+            on_text:
+                self.parent.scroll_y = 0
+    TextInput:
+        id: commandline
+        multiline: False
+        size_hint_y: None
+        height: 30
+        font_size: 16
+        on_text: if self.text.find("/t") != -1: print("bing")
