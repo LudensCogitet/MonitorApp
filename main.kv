@@ -1,3 +1,6 @@
+<Widget>:
+    color: 0,0,0,1
+
 <MainWidget>:
     canvas.before:
         Color:
@@ -8,35 +11,39 @@
 
     BoxLayout:
         id: monitorSpace
-
+        size_hint: (1.0,1.0)
 
 <SliderMonitor>:
     orientation: 'vertical'
-    Slider:
-        id: slider
+
     Label:
-        font_size: 10
+        id: name
+        font_size: 20
+        size_hint_y: 0.1
+    Slider:
+        id: value
+        size_hint_y: 0.9
+        orientation: 'vertical'
 
 <NumberMonitor>:
     orientation: 'vertical'
     Label:
         id: name
-        font_size: 10
+        font_size: 20
+        size_hint_y: 0.1
     Label:
         id: value
-        text: "LOLOLOLOL!"
+        size_hint_y: 0.9
+        text: "0"
         font_size: 30
 
 <ConsoleWidget>:
-    on_pos: print(str(self.pos))
     orientation: 'vertical'
     drag_rectangle: self.x, self.y, self.width, self.height
     drag_timeout: 10000000
     drag_distance: 0
 
-    size_hint: (None,None)
-    width: 400
-    height: 300
+    size_hint: (0.5,0.5)
 
     ScrollView:
         id: readout

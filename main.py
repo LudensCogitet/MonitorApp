@@ -14,10 +14,10 @@ from kivy.core.window import Window
 import re
 from Parser import Parser
 
-class SliderMonitor(Slider):
+class SliderMonitor(BoxLayout):
     pass
 
-class NumberMonitor(Label):
+class NumberMonitor(BoxLayout):
     pass
 
 class ConsoleWidget(DragBehavior, BoxLayout):
@@ -37,7 +37,7 @@ class ConsoleWidget(DragBehavior, BoxLayout):
         self.ids.commandline.text = ""
         self.ids.commandline.focus = True
 
-class MainWidget(BoxLayout):
+class MainWidget(FloatLayout):
     def __init__(self):
         super(MainWidget,self).__init__()
         self._keyboard = Window.request_keyboard(None,self)
@@ -52,8 +52,12 @@ class MainWidget(BoxLayout):
         elif type == 'slider':
             self.monitors[name] = SliderMonitor()
 
+        self.monitors[name].ids.name.text = name
         self.ids.monitorSpace.add_widget(self.monitors[name])
 
+    def removeMonitor(self,name,*args):
+        self.ids.monitorSpace.remove_widget(self.monitors[name])
+        del self.monitors[name]
 
     def _on_keyboard_down(self,keyboard,keycode,text,modifiers):
         if self.console.active == True:
