@@ -10,6 +10,7 @@ from kivy.uix.label import Label
 from kivy.uix.behaviors import DragBehavior, ButtonBehavior
 from kivy.properties import ObjectProperty
 from kivy.core.window import Window
+from kivy.clock import Clock
 
 import re
 from Parser import Parser
@@ -21,9 +22,16 @@ class NumberMonitor(BoxLayout):
     pass
 
 class ConsoleWidget(DragBehavior, BoxLayout):
-    def __init__(self):
+    def __init__(self,mainWidget):
         super(ConsoleWidget,self).__init__()
         self.active = False
+        self.mainWidget = mainWidget
+
+    def refocusCommandline(self, dt = None):
+        if dt == None:
+            Clock.schedule_once(self.refocusCommandline,0.01)
+        else:
+            self.ids.commandline.focus = True
 
     def handleInput(self):
         console = self.ids.readout.children[0]
@@ -31,7 +39,9 @@ class ConsoleWidget(DragBehavior, BoxLayout):
         text = commandline.text
 
         commands = text.split(' ')
-        parseReturn = app.parser.execute(commands[0],*commands[1:])
+
+        parseReturn = '\n> ' + text
+        parseReturn = parseReturn + app.parser.execute(commands[0],*commands[1:])
         console.text = console.text + parseReturn
 
         self.ids.commandline.text = ""
@@ -42,7 +52,7 @@ class MainWidget(FloatLayout):
         super(MainWidget,self).__init__()
         self._keyboard = Window.request_keyboard(None,self)
         self._keyboard.bind(on_key_down=self._on_keyboard_down)
-        self.console = ConsoleWidget()
+        self.console = ConsoleWidget(self)
         self.monitorTypes = ['number','slider']
         self.monitors = {}
 
@@ -59,15 +69,18 @@ class MainWidget(FloatLayout):
         self.ids.monitorSpace.remove_widget(self.monitors[name])
         del self.monitors[name]
 
-    def _on_keyboard_down(self,keyboard,keycode,text,modifiers):
+    def checkShortcuts(self,key):
         if self.console.active == True:
-            if keycode[1] == 'tab' :
+            if key == 'tab' or key.endswith('\t'):
                 self._close_console()
-            elif keycode[1] == 'enter':
+            elif key == 'enter':
                 self.console.handleInput()
         elif self.console.active == False:
-            if keycode[1] == 'tab':
+            if key == 'tab':
                 self._open_console()
+
+    def _on_keyboard_down(self,keyboard,keycode,text,modifiers):
+        self.checkShortcuts(keycode[1])
 
     def _open_console(self):
         self.console.active = True
@@ -77,6 +90,7 @@ class MainWidget(FloatLayout):
     def _close_console(self):
         self.console.active = False
         self.console.ids.commandline.text = ""
+        self.console.ids.commandline.focus = False
         self.remove_widget(self.console)
 
 class MainApp(App):
