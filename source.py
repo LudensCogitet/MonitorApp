@@ -1,6 +1,9 @@
+from os import system
 import time
 import random
 from multiprocessing import Process, Manager
+
+clear = lambda: system('cls')
 
 class Source(Process):
     def __init__(self,name,values):
@@ -56,9 +59,10 @@ if __name__ == '__main__':
 
     sourceManager.start()
 
-    for i in range(60):
-        time.sleep(0.1)
+    for i in range(15):
+        time.sleep(1)
         state = sourceManager.poll()
+        clear()
         for source in state:
             print(state[source]['name'], state[source]['value'], state[source]['timestamp'])
 
