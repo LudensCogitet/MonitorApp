@@ -22,16 +22,21 @@ class NumberMonitor(BoxLayout):
     pass
 
 class ConsoleWidget(DragBehavior, BoxLayout):
-    def __init__(self,mainWidget):
+    def __init__(self):
         super(ConsoleWidget,self).__init__()
         self.active = False
-        self.mainWidget = mainWidget
 
     def refocusCommandline(self, dt = None):
         if dt == None:
             Clock.schedule_once(self.refocusCommandline,0.01)
         else:
             self.ids.commandline.focus = True
+
+    def checkShortcuts(self,key):
+        if key == 'tab' or key.endswith('\t'):
+            self.parent._close_console()
+        elif key == 'enter':
+            self.handleInput()
 
     def handleInput(self):
         console = self.ids.readout.children[0]
@@ -52,7 +57,7 @@ class MainWidget(FloatLayout):
         super(MainWidget,self).__init__()
         self._keyboard = Window.request_keyboard(None,self)
         self._keyboard.bind(on_key_down=self._on_keyboard_down)
-        self.console = ConsoleWidget(self)
+        self.console = ConsoleWidget()
         self.monitorTypes = ['number','slider']
         self.monitors = {}
 
@@ -69,18 +74,13 @@ class MainWidget(FloatLayout):
         self.ids.monitorSpace.remove_widget(self.monitors[name])
         del self.monitors[name]
 
-    def checkShortcuts(self,key):
-        if self.console.active == True:
-            if key == 'tab' or key.endswith('\t'):
-                self._close_console()
-            elif key == 'enter':
-                self.console.handleInput()
-        elif self.console.active == False:
+    def _on_keyboard_down(self,keyboard,keycode,text,modifiers):
+        key = keycode[1]
+        if self.console.active == False:
             if key == 'tab':
                 self._open_console()
-
-    def _on_keyboard_down(self,keyboard,keycode,text,modifiers):
-        self.checkShortcuts(keycode[1])
+        else:
+            self.console.checkShortcuts(key)
 
     def _open_console(self):
         self.console.active = True

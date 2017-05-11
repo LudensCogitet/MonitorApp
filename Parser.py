@@ -1,5 +1,6 @@
 class Parser:
     command = {}
+    verbose = True
 
     def __init__(self, mainWidget):
         self.mainWidget = mainWidget
@@ -9,7 +10,10 @@ class Parser:
         if func not in Parser.command:
             return "\nUnrecognized command " + func
         else:
-            return Parser.command[func](self.mainWidget,*args)
+            try:
+                return Parser.command[func](self.mainWidget,*args)
+            except TypeError as e:
+                return "\n" + str(e)
 
     def _addFunc(name,function):
         name = name.lower()
