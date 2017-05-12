@@ -15,7 +15,7 @@ from kivy.clock import Clock
 import re
 from Parser import Parser
 from Source import Source
-from multiprocessing import Manager
+import subprocess
 
 class SliderMonitor(BoxLayout):
     pass
@@ -107,5 +107,6 @@ class MainApp(App):
         return self.mainWidget
 
 if __name__ == '__main__':
+    p = subprocess.Popen(['python','Source.py'])
     app = MainApp()
     app.run()

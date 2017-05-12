@@ -54,17 +54,18 @@ class SourceManager:
 
         return returnDict
 
-if __name__ == '__main__':
+if __name__ == '__main__'
     sourceManager = SourceManager(['source1','source2','source3'])
 
     sourceManager.start()
 
-    for i in range(15):
-        time.sleep(1)
-        state = sourceManager.poll()
-        clear()
-        for source in state:
-            print(state[source]['name'], state[source]['value'], state[source]['timestamp'])
+    done = False
+    while not done:
+        command = input()
+
+        if command == 'kill':
+            done = True
+        elif command == 'poll':
+            print(sourceManager.poll())
 
     sourceManager.stop()
-    input()
