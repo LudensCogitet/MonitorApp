@@ -14,6 +14,8 @@ from kivy.clock import Clock
 
 import re
 from Parser import Parser
+from Source import Source
+from multiprocessing import Manager
 
 class SliderMonitor(BoxLayout):
     pass
